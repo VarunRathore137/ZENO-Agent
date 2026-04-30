@@ -10,8 +10,8 @@ wave: 1
 Build the audio capture foundation and global hotkey listener. `capture.py` provides a
 continuous, non-blocking microphone stream that other voice components consume via a
 shared `queue.Queue`. `hotkeys.py` registers `Ctrl+Shift+Space` (brain dump) and
-`Ctrl+Shift+J` held (push-to-talk) using the `keyboard` library (already in
-`requirements.txt`), signaling via `threading.Event` flags.
+`Ctrl+Shift+J` held (push-to-talk) using the `pynput` library (must be added to
+dependencies), signaling via `threading.Event` flags.
 
 This is the lowest-level audio infrastructure that wake word detection and STT both
 depend on — it must be implemented first.
@@ -69,7 +69,7 @@ depend on — it must be implemented first.
     zeno/voice/hotkeys.py
   </files>
   <action>
-    Create `zeno/voice/hotkeys.py` using the `keyboard` library (already in requirements.txt).
+    Create `zeno/voice/hotkeys.py` using the `pynput` library. First, ensure `pynput` is added to `pyproject.toml` and `requirements.txt`.
 
     1. Define `HotkeyState` dataclass (or simple class):
        ```python
@@ -94,21 +94,17 @@ depend on — it must be implemented first.
        - `_on_ptt_release(self) -> None`: Clears `self.state.push_to_talk_active`.
 
        - `start(self) -> None`:
-         Registers hotkeys using `keyboard.add_hotkey` and `keyboard.on_press_key` /
-         `keyboard.on_release_key` in a daemon thread:
-         * `keyboard.add_hotkey("ctrl+shift+space", self._on_brain_dump)`
-         * Push-to-talk: detect `ctrl+shift+j` hold — use `keyboard.on_press_key("j",
-           self._on_ptt_press)` and `keyboard.on_release_key("j", self._on_ptt_release)`.
-           Note: simplified — full combo detection via `keyboard.is_pressed`.
-         Then call `keyboard.wait()` — this blocks the thread but not the main thread.
-         Run this entire registration in a daemon `threading.Thread`.
+         Registers hotkeys using `pynput.keyboard.GlobalHotKeys` in a daemon thread:
+         * Create listener: `self._listener = pynput.keyboard.GlobalHotKeys({'<ctrl>+<shift>+<space>': self._on_brain_dump, '<ctrl>+<shift>+j': self._on_ptt_press})`
+         * Since `GlobalHotKeys` doesn't easily support release events for combinations natively out of the box without a custom listener, just handling the press event for PTT is acceptable to activate it for Phase 2.
+         * Start the listener: `self._listener.start()` in a daemon thread, or since listener is a daemon thread, just `self._listener.start()`.
 
-       - `stop(self) -> None`: Calls `keyboard.unhook_all()` and sets `self._stop_event`.
+       - `stop(self) -> None`: Calls `self._listener.stop()` and sets `self._stop_event`.
 
     3. Module-level `create_listener(state: HotkeyState | None = None) -> HotkeyListener`
        factory function for convenience.
 
-    Import: `keyboard`, `threading`, `dataclasses`, `time`.
+    Import: `pynput`, `threading`, `dataclasses`, `time`.
 
     CRITICAL: Do NOT block the main thread. All listener logic in daemon thread.
     CRITICAL: Callbacks must never raise — wrap in try/except and log to stderr.

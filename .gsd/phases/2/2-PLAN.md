@@ -73,7 +73,9 @@ The first task in this plan adds it. It downloads model files (~50MB) on first r
          * `self._thread: threading.Thread | None = None`
 
        - `_score_frame(self, audio_frame: np.ndarray) -> float`:
-         Calls `self._model.predict(audio_frame)` — returns a dict like
+         `openwakeword` requires `int16` PCM, but `sounddevice` outputs `float32`.
+         Must convert: `frame_int16 = (audio_frame * 32768).astype(np.int16)`
+         Calls `self._model.predict(frame_int16)` — returns a dict like
          `{"hey_jarvis": 0.87}`. Extract the max score across all keys and return it.
 
        - `run_loop(self, audio_queue: queue.Queue) -> None`:
