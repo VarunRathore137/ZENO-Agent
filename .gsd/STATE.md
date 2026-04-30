@@ -1,20 +1,28 @@
 # GSD State
 
+> Last updated: 2026-04-30
+
 ## Current Position
-- **Phase**: 1
-- **Plan**: 1.2 — SQLite Database Bootstrap
+- **Phase**: 2 — Voice Pipeline: Wake Word & STT
+- **Task**: Planning complete
 - **Status**: Ready for execution
 
-## Plans Status
-- ✅ 1.1 — Project Scaffold & Directory Layout (done — commit df0f4b4)
-- ⏳ 1.2 — SQLite Database Bootstrap (wave 1 — next)
-- 🔲 1.3 — Config Layer — YAML + user_profile Sync (wave 2 — blocked on 1.2)
+## Phase 2 Plans
+| Plan | Name | Wave | Status |
+|------|------|------|--------|
+| 2.1 | Microphone Capture & Global Hotkeys | 1 | ⬜ Pending |
+| 2.2 | Wake Word Detection Loop | 1 | ⬜ Pending |
+| 2.3 | Whisper STT Transcriber + Unit Tests | 2 | ⬜ Pending |
 
-## Accumulated Decisions
-- Git initialized on master branch
-- `.gitignore` added (pycache, venvs, build artifacts excluded)
-- `pyproject.toml` uses setuptools backend (PEP 621 style)
-- No version pins except `apscheduler>=3.10,<4`
+## Dependency Note
+Phase 1 Plans 2 (DB Bootstrap) and 3 (Config Layer) were planned but NOT executed.
+`zeno/db.py`, `zeno/config.py`, and `scripts/init_db.py` do not yet exist.
+Phase 2 does NOT depend on these — voice pipeline is self-contained.
+Execute Phase 1 Plans 2 & 3 before Phase 3 (NLP) which will need DB access.
 
 ## Next Steps
-1. `/execute plan 2` — SQLite Database Bootstrap
+1. `/execute 2` — run Phase 2 plans (waves 1 then 2)
+
+## Phase 1 Archive Note
+Phase 1 Plan 1 completed and summarized in `.gsd/phases/1/1-SUMMARY.md`.
+Phase 1 Plans 2 & 3 remain unexecuted — need to be run before Phase 3.
