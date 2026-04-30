@@ -11,6 +11,8 @@ dependencies = [
     "anthropic",
     "openai-whisper",
     "sounddevice",
+    "numpy",
+    "pynput",
     "pyaudio",
     "pyttsx3",
     "apscheduler>=3.10,<4",
