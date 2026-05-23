@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "zeno"
+version = "0.1.0"
+description = "ZENO — Just A Rather Very Intelligent System"
+requires-python = ">=3.11"
+dependencies = [
+    "anthropic",
+    "openai-whisper",
+    "sounddevice",
+    "numpy",
+    "pynput",
+    "pyaudio",
+    "pyttsx3",
+    "apscheduler>=3.10,<4",
+    "websockets",
+    "flask",
+    "icalendar",
+    "openwakeword",
+    "pyyaml",
+    "rapidfuzz",
+    "keyboard",
+    "pygetwindow",
+    "pywin32",
+]
+
+[project.scripts]
+zeno = "zeno.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["zeno*"]

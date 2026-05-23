@@ -1,0 +1,17 @@
+anthropic
+openai-whisper
+sounddevice
+openwakeword
+numpy
+pynput
+pyaudio
+pyttsx3
+apscheduler>=3.10,<4
+websockets
+flask
+icalendar
+pyyaml
+rapidfuzz
+keyboard
+pygetwindow
+pywin32
