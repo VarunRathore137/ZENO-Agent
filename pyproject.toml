@@ -19,6 +19,7 @@ dependencies = [
     "websockets",
     "flask",
     "icalendar",
+    "openwakeword",
     "pyyaml",
     "rapidfuzz",
     "keyboard",

@@ -1,6 +1,7 @@
 anthropic
 openai-whisper
 sounddevice
+openwakeword
 numpy
 pynput
 pyaudio

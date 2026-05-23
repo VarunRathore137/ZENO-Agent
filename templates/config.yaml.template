@@ -1,0 +1,12 @@
+zeno:
+  wake_word: "Hey Zeno"
+  claude_model: "claude-sonnet-4"
+  tts_engine: "pyttsx3"         # options: pyttsx3, elevenlabs, coqui
+  stt_model: "whisper-base"     # options: whisper-tiny, whisper-base, whisper-small
+  timezone: "UTC"               # e.g. "Asia/Kolkata"
+  working_hours_start: "09:00"
+  working_hours_end: "18:00"
+  morning_briefing_time: "08:30"
+api_keys:
+  anthropic: ""                 # Set ANTHROPIC_API_KEY env var instead
+  elevenlabs: ""                # Set ELEVENLABS_API_KEY env var instead

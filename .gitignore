@@ -31,3 +31,6 @@ Thumbs.db
 
 # ZENO runtime data (local only)
 ~/Zeno/
+.agent
+.gemini
+.gsd
