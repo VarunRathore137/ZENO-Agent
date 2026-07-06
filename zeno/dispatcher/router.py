@@ -4,7 +4,7 @@ from typing import Dict, Callable
 
 from zeno.nlp.intent_schema import ParsedIntent
 from zeno.db import db_session
-from zeno.handlers import tasks, notes, reminders, sessions
+from zeno.handlers import tasks, notes, reminders, sessions, workspaces
 
 # Mapping of intent_name -> handler_function
 HANDLER_MAP: Dict[str, Callable[[ParsedIntent, sqlite3.Connection], str]] = {
@@ -24,6 +24,12 @@ HANDLER_MAP: Dict[str, Callable[[ParsedIntent, sqlite3.Connection], str]] = {
     # Sessions
     "start_new_session": sessions.handle_start_new_session,
     "initiate_shutdown": sessions.handle_initiate_shutdown,
+    
+    # Workspaces
+    "setup_workspace":          workspaces.handle_setup_workspace,
+    "list_workspaces":          workspaces.handle_list_workspaces,
+    "stop_workspace":           workspaces.handle_stop_workspace,
+    "register_workspace_app":   workspaces.handle_register_workspace_app,
 }
 
 def dispatch(intent: ParsedIntent, db_path: str | None = None) -> str:
