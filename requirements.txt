@@ -16,3 +16,4 @@ keyboard
 pygetwindow
 pywin32
 google-genai
+elevenlabs
