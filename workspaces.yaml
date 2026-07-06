@@ -1,0 +1,34 @@
+# ZENO Workspace Definitions
+# Each workspace is a named sequence of steps executed by the Macro Engine.
+# Supported step types: open_app, open_url, focus_window, arrange_windows,
+#                        toggle_dnd, announce, wait_ms
+
+workspaces:
+  coding:
+    name: "Coding Setup"
+    description: "Open VS Code, terminal, and browser for development"
+    steps:
+      - type: announce
+        message: "Setting up your coding workspace."
+      - type: open_app
+        app_name: "Code"
+      - type: wait_ms
+        duration: 1500
+      - type: open_url
+        url: "https://github.com"
+      - type: toggle_dnd
+        enabled: true
+      - type: arrange_windows
+        layout: "maximise_first"
+        apps: ["Code"]
+
+  writing:
+    name: "Writing Setup"
+    description: "Open Notion and enable DND for focused writing"
+    steps:
+      - type: announce
+        message: "Setting up your writing workspace."
+      - type: open_app
+        app_name: "Notion"
+      - type: toggle_dnd
+        enabled: true
