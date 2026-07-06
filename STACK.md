@@ -11,7 +11,7 @@
 | TypeScript / React | (TBD) | Tauri frontend UI (tray, overlays, dashboard) |
 | SQLite | 3.x (WAL mode) | Local persistent storage — all user data |
 
-> ⚠️ **No codebase exists yet.** The stack is inferred from design artifacts (SQL schema, component diagram, voice grammar document). No `package.json`, `requirements.txt`, or `Cargo.toml` is present in the repository.
+> The project has completed Milestone 1 (Foundation & Core Backend). `requirements.txt` and `pyproject.toml` are present.
 
 ---
 

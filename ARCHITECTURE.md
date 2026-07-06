@@ -312,7 +312,7 @@ start_rubber_duck intent
 
 ## Technical Debt
 
-- [ ] No source code exists yet — all artifacts are design documents only (SQL schema, voice grammar, SVG diagram, PRD DOCX)
+- [x] Source code for Milestone 1 exists.
 - [ ] `.gsd/phases/` directory contains Quantum Programming Studio phase plans (unrelated project) — should be cleared before ZENO phases are added
 - [ ] No `package.json`, `requirements.txt`, `pyproject.toml`, or `Cargo.toml` yet — stack is not scaffolded
 - [ ] Browser extension architecture is undefined beyond its role in the component diagram

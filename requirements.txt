@@ -15,3 +15,4 @@ rapidfuzz
 keyboard
 pygetwindow
 pywin32
+google-genai
