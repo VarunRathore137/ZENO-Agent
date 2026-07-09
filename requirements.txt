@@ -15,5 +15,6 @@ rapidfuzz
 keyboard
 pygetwindow
 pywin32
+psutil>=5.9
 google-genai
 elevenlabs

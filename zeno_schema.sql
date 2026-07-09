@@ -270,7 +270,6 @@ CREATE TABLE IF NOT EXISTS activity_log (
     task_id         INTEGER,             -- inferred from active task
     input_level     TEXT    NOT NULL DEFAULT 'idle'
                             CHECK (input_level IN ('idle', 'light', 'moderate', 'heavy')),
-    wpm_bucket      INTEGER,             -- 0, 10, 20, 30, 40, 50+ words-per-minute bucket
     is_off_task     INTEGER NOT NULL DEFAULT 0,  -- 1 if app classified as non-work
     FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE SET NULL,
     FOREIGN KEY (task_id)    REFERENCES tasks(id)    ON DELETE SET NULL
