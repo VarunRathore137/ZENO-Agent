@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "ZENO Activity Tracker",
+  "version": "1.0.0",
+  "description": "Tracks browser tab dwell time and sends data to the ZENO personal assistant daemon.",
+  "_comment_browsers": "Minimum supported: Chrome 88+, Edge 88+, Firefox 121+ (MV3 service worker). Firefox < 121 not supported.",
+
+  "permissions": [
+    "tabs",
+    "activeTab",
+    "storage"
+  ],
+
+  "host_permissions": [
+    "ws://localhost:8765/*"
+  ],
+
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ],
+
+  "action": {
+    "default_title": "ZENO Activity Tracker"
+  }
+}
