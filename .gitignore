@@ -29,6 +29,13 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Rust build artifacts
+src-tauri/target/
+
+# Frontend build artifacts
+frontend/node_modules/
+frontend/dist/
+
 # ZENO runtime data (local only)
 ~/Zeno/
 .agent

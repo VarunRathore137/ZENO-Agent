@@ -1,0 +1,10 @@
+{
+  "$schema": "https://schema.tauri.app/mobile/2",
+  "identifier": "default",
+  "description": "Default capabilities for ZENO",
+  "windows": ["main", "overlay"],
+  "permissions": [
+    "core:default",
+    "shell:allow-open"
+  ]
+}

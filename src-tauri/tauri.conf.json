@@ -1,0 +1,47 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "identifier": "com.zeno.app",
+  "productName": "ZENO",
+  "version": "0.1.0",
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/icon.ico"]
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "label": "main",
+        "title": "ZENO",
+        "width": 1200,
+        "height": 780,
+        "minWidth": 900,
+        "minHeight": 560,
+        "visible": false,
+        "decorations": true,
+        "resizable": true,
+        "center": true
+      },
+      {
+        "label": "overlay",
+        "title": "ZENO — Quick Capture",
+        "width": 540,
+        "height": 170,
+        "visible": false,
+        "decorations": false,
+        "alwaysOnTop": true,
+        "resizable": false,
+        "center": true,
+        "url": "index.html#/overlay"
+      }
+    ],
+    "security": { "csp": null }
+  },
+  "build": {
+    "beforeDevCommand": "npm run dev --prefix ../frontend",
+    "beforeBuildCommand": "npm run build --prefix ../frontend",
+    "devUrl": "http://localhost:5173",
+    "frontendDist": "../frontend/dist"
+  }
+}
