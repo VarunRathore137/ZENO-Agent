@@ -1,3 +1,4 @@
+import asyncio
 import threading
 import time
 import sys
@@ -10,20 +11,34 @@ class HotkeyState:
     push_to_talk_active: threading.Event = field(default_factory=threading.Event)
 
 class HotkeyListener:
-    def __init__(self, state: HotkeyState | None = None):
+    def __init__(
+        self,
+        state: HotkeyState | None = None,
+        ws_server=None,             # optional BrowserWebSocketServer reference
+        event_loop=None,            # asyncio loop running the WS server
+    ):
         self.state = state if state is not None else HotkeyState()
+        self._ws_server = ws_server
+        self._event_loop = event_loop
         self._listener: pynput.keyboard.GlobalHotKeys | None = None
         self._stop_event = threading.Event()
 
     def _on_brain_dump(self) -> None:
         try:
             self.state.brain_dump_triggered.set()
-            
+
             def clear_flag():
                 time.sleep(0.1)
                 self.state.brain_dump_triggered.clear()
-                
+
             threading.Thread(target=clear_flag, daemon=True).start()
+
+            # broadcast overlay_show to React frontend via WebSocket
+            if self._ws_server is not None and self._event_loop is not None:
+                asyncio.run_coroutine_threadsafe(
+                    self._ws_server.broadcast({"type": "overlay_show"}),
+                    self._event_loop,
+                )
         except Exception as e:
             print(f"Error in brain dump hotkey: {e}", file=sys.stderr)
 
@@ -54,5 +69,9 @@ class HotkeyListener:
             self._listener.stop()
         self._stop_event.set()
 
-def create_listener(state: HotkeyState | None = None) -> HotkeyListener:
-    return HotkeyListener(state)
+def create_listener(
+    state: HotkeyState | None = None,
+    ws_server=None,
+    event_loop=None,
+) -> HotkeyListener:
+    return HotkeyListener(state=state, ws_server=ws_server, event_loop=event_loop)

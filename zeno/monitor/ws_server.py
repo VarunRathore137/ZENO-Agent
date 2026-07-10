@@ -36,6 +36,7 @@ class BrowserWebSocketServer:
         # In-flight sessions: domain → session dict
         # Last open wins per domain (handles rapid tab switches gracefully)
         self._pending: dict[str, dict] = {}
+        self.connected_clients: set = set()  # tracks all active WebSocket connections
 
     async def start(self) -> None:
         """Start the WebSocket server. Returns when server is ready to accept connections."""
@@ -52,18 +53,40 @@ class BrowserWebSocketServer:
             self._server = None
 
     async def _handle(self, ws) -> None:
-        """Handle one browser extension WebSocket connection."""
-        async for raw in ws:
+        """Handle one WebSocket connection (browser extension OR React frontend)."""
+        self.connected_clients.add(ws)
+        try:
+            async for raw in ws:
+                try:
+                    msg = json.loads(raw)
+                except json.JSONDecodeError:
+                    continue
+                msg_type = msg.get("type")
+                if msg_type == "tab_open":
+                    await self._on_tab_open(msg)
+                elif msg_type == "tab_close":
+                    await self._on_tab_close(msg)
+                # ping: intentional no-op
+        finally:
+            self.connected_clients.discard(ws)
+
+    async def broadcast(self, payload: dict) -> None:
+        """
+        Push a JSON message to ALL connected WebSocket clients
+        (browser extension connections + React frontend connections).
+
+        Called from non-async context via:
+            asyncio.run_coroutine_threadsafe(ws_server.broadcast(payload), loop)
+        """
+        if not self.connected_clients:
+            return
+        message = json.dumps(payload)
+        # Iterate over a snapshot to avoid mutation during iteration
+        for ws in list(self.connected_clients):
             try:
-                msg = json.loads(raw)
-            except json.JSONDecodeError:
-                continue
-            msg_type = msg.get("type")
-            if msg_type == "tab_open":
-                await self._on_tab_open(msg)
-            elif msg_type == "tab_close":
-                await self._on_tab_close(msg)
-            # ping: intentional no-op
+                await ws.send(message)
+            except Exception:
+                self.connected_clients.discard(ws)
 
     async def _on_tab_open(self, msg: dict) -> None:
         domain = msg.get("domain", "unknown")
