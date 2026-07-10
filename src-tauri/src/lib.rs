@@ -1,7 +1,7 @@
 use tauri::{
     menu::{MenuBuilder, MenuItemBuilder},
     tray::TrayIconBuilder,
-    Manager, WindowEvent,
+    Emitter, Manager, WindowEvent,
 };
 
 mod commands;
@@ -87,9 +87,10 @@ pub fn run() {
                     "quit" => {
                         // Tell daemon to shut down cleanly, then exit after grace period
                         post_daemon("/daemon/shutdown");
+                        let app_handle = app.clone();
                         std::thread::spawn(move || {
                             std::thread::sleep(std::time::Duration::from_millis(500));
-                            app.exit(0);
+                            app_handle.exit(0);
                         });
                     }
                     _ => {}
