@@ -56,93 +56,13 @@ class LLMProvider(Protocol):
 
 
 # ---------------------------------------------------------------------------
-# ClaudeProvider
+# ClaudeProvider — alias to GeminiProvider
 # ---------------------------------------------------------------------------
-
-class ClaudeProvider:
-    """
-    LLMProvider backed by Anthropic Claude.
-    Best for: morning briefings, rubber duck sessions, PRD generation,
-              weekly insight narratives, clarification disambiguation.
-    """
-
-    DEFAULT_MODEL = "claude-sonnet-4-5"
-
-    def __init__(self, api_key: str | None = None, model: str | None = None) -> None:
-        self._api_key = api_key or os.environ.get("ANTHROPIC_API_KEY", "")
-        self.model = model or self.DEFAULT_MODEL
-        self._client: Any = None  # lazy-init
-
-    def _get_client(self) -> Any:
-        if self._client is None:
-            if not self._api_key:
-                raise ValueError(
-                    "ANTHROPIC_API_KEY environment variable is not set. "
-                    "Claude provider cannot initialise."
-                )
-            try:
-                import anthropic  # type: ignore[import]
-                self._client = anthropic.AsyncAnthropic(api_key=self._api_key)
-            except ImportError:
-                print(
-                    "Error: 'anthropic' package not installed. Run: pip install anthropic",
-                    file=sys.stderr,
-                )
-                raise
-        return self._client
-
-    async def complete(
-        self,
-        messages: list[dict[str, str]],
-        system: str = "",
-        max_tokens: int = 2048,
-    ) -> str:
-        client = self._get_client()
-        kwargs: dict[str, Any] = {
-            "model": self.model,
-            "max_tokens": max_tokens,
-            "messages": messages,
-        }
-        if system:
-            kwargs["system"] = system
-        response = await client.messages.create(**kwargs)
-        return response.content[0].text
-
-    async def complete_structured(
-        self,
-        messages: list[dict[str, str]],
-        system: str = "",
-        schema: dict[str, Any] | None = None,
-    ) -> dict[str, Any]:
-        # Append instruction to respond with JSON
-        structured_system = (system + "\n\nRespond ONLY with valid JSON.").strip()
-        text = await self.complete(messages, system=structured_system, max_tokens=4096)
-        # Strip markdown code fences if present
-        text = text.strip()
-        if text.startswith("```"):
-            lines = text.splitlines()
-            text = "\n".join(
-                line for line in lines
-                if not line.startswith("```")
-            ).strip()
-        return json.loads(text)
-
-    async def stream(
-        self,
-        messages: list[dict[str, str]],
-        system: str = "",
-    ) -> AsyncIterator[str]:
-        client = self._get_client()
-        kwargs: dict[str, Any] = {
-            "model": self.model,
-            "max_tokens": 4096,
-            "messages": messages,
-        }
-        if system:
-            kwargs["system"] = system
-        async with client.messages.stream(**kwargs) as s:
-            async for chunk in s.text_stream:
-                yield chunk
+# NOTE: ZENO uses Google Gemini as its sole LLM (free tier via GOOGLE_API_KEY).
+# ClaudeProvider is kept as a forward-reference alias so any existing code
+# that imports it by name still works without modification.
+# The alias is assigned after GeminiProvider is defined below.
+# ---------------------------------------------------------------------------
 
 
 # ---------------------------------------------------------------------------
@@ -233,17 +153,22 @@ class GeminiProvider:
         yield text
 
 
+# ClaudeProvider alias — all AI tasks use Gemini
+ClaudeProvider = GeminiProvider  # type: ignore[assignment,misc]
+
+
 # ---------------------------------------------------------------------------
 # ProviderRouter
 # ---------------------------------------------------------------------------
 
-# Default feature → provider mapping. Can be overridden by config.yaml.
+# Default feature → provider mapping. All features use Gemini.
+# Can be overridden by config.yaml `llm_routing` section.
 _DEFAULT_ROUTING: dict[str, str] = {
-    "rubber_duck": "claude",
-    "morning_briefing": "claude",
-    "prd_generation": "claude",
-    "weekly_insights": "claude",
-    "clarification": "claude",
+    "rubber_duck": "gemini",
+    "morning_briefing": "gemini",
+    "prd_generation": "gemini",
+    "weekly_insights": "gemini",
+    "clarification": "gemini",
     "intent_slot_fill": "gemini",
     "fallback": "gemini",
 }
@@ -261,8 +186,9 @@ class ProviderRouter:
     def __init__(
         self,
         config_path: str | None = None,
-        claude_provider: LLMProvider | None = None,
         gemini_provider: LLMProvider | None = None,
+        # claude_provider kept for API compatibility but ignored
+        claude_provider: LLMProvider | None = None,
     ) -> None:
         self._providers: dict[str, LLMProvider] = {}
         self._routing: dict[str, str] = dict(_DEFAULT_ROUTING)
@@ -271,9 +197,11 @@ class ProviderRouter:
         if config_path:
             self._load_config(config_path)
 
-        # Register concrete providers (lazy: only initialised if actually used)
-        self._providers["claude"] = claude_provider or ClaudeProvider()
+        # All LLM calls route through Gemini
         self._providers["gemini"] = gemini_provider or GeminiProvider()
+        # Keep "claude" key pointing to Gemini so any routing override
+        # that specifies "claude" still works gracefully
+        self._providers["claude"] = self._providers["gemini"]
 
     def _load_config(self, config_path: str) -> None:
         """Merge llm_routing from a config.yaml file into the routing table."""

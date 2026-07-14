@@ -8,7 +8,6 @@ version = "0.1.0"
 description = "ZENO — Just A Rather Very Intelligent System"
 requires-python = ">=3.11"
 dependencies = [
-    "anthropic",
     "openai-whisper",
     "sounddevice",
     "numpy",
@@ -17,7 +16,6 @@ dependencies = [
     "pyttsx3",
     "apscheduler>=3.10,<4",
     "websockets",
-    "flask",
     "icalendar",
     "openwakeword",
     "pyyaml",
@@ -26,6 +24,10 @@ dependencies = [
     "keyboard",
     "pygetwindow",
     "pywin32",
+    "psutil>=5.9",
+    "elevenlabs",
+    "fastapi[standard]>=0.115",
+    "uvicorn[standard]>=0.30",
 ]
 
 [project.scripts]
