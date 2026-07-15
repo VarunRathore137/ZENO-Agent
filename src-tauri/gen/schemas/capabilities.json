@@ -1,0 +1,1 @@
+{"default":{"identifier":"default","description":"Default capabilities for ZENO","local":true,"windows":["main","overlay"],"permissions":["core:default","shell:allow-open"]}}

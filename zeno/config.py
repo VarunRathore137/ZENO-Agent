@@ -18,13 +18,13 @@ def load_config(config_path: Path | None = None) -> dict[str, Any]:
         
     defaults = {
         "zeno": {
-            "wake_word": "Hey Zeno",
+            "wake_word": ["Hey Zeno", "Okay Zeno", "Yo Zeno", "Hey Zeno wake up", "Wake up Zeno", "Zen wake up", "Hey Zen", "Hello Zeno", "Yo Zen", "Hi Zen"],
             "claude_model": "claude-sonnet-4",
             "tts_engine": "pyttsx3",
             "stt_model": "whisper-base",
             "timezone": "UTC",
             "working_hours_start": "09:00",
-            "working_hours_end": "18:00",
+            "working_hours_end": "00:00",
             "morning_briefing_time": "08:30"
         }
     }

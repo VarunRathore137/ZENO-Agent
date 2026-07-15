@@ -6,16 +6,18 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "tauri": "cd .. && tauri dev"
   },
   "dependencies": {
     "@tauri-apps/api": "^2",
+    "lucide-react": "^0.400.0",
     "react": "^19",
     "react-dom": "^19",
-    "recharts": "^2.12",
-    "lucide-react": "^0.400.0"
+    "recharts": "^2.12"
   },
   "devDependencies": {
+    "@tauri-apps/cli": "^2.11.4",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^4",
