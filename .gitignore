@@ -1,43 +1,125 @@
+# ============================================================
+# ZENO Personal Assistant — .gitignore
+# ============================================================
+
+# ----------------------------------------------------------
 # Python
+# ----------------------------------------------------------
 __pycache__/
 *.py[cod]
 *$py.class
 *.egg-info/
+*.egg
 dist/
 build/
 .eggs/
+*.pyd
+*.so
+*.dll
 
+# ----------------------------------------------------------
 # Virtual environments
+# ----------------------------------------------------------
 .venv/
 venv/
 env/
+ENV/
+.env
 
+# ----------------------------------------------------------
+# Environment & secrets — NEVER commit API keys
+# ----------------------------------------------------------
+.env
+.env.*
+*.env
+secrets.yaml
+secrets.json
+*.key
+*.pem
+*.p12
+*.pfx
+
+# ----------------------------------------------------------
 # Type checking / linting caches
+# ----------------------------------------------------------
 .mypy_cache/
 .ruff_cache/
+.pytype/
 
-# Testing
+# ----------------------------------------------------------
+# Testing & coverage
+# ----------------------------------------------------------
 .pytest_cache/
 htmlcov/
 .coverage
+.coverage.*
+coverage.xml
+*.coveragerc
 
-# OS
+# ----------------------------------------------------------
+# OS generated files
+# ----------------------------------------------------------
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
+desktop.ini
 
-# IDE
+# ----------------------------------------------------------
+# IDE / Editor
+# ----------------------------------------------------------
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+*.sublime-workspace
+*.sublime-project
 
-# Rust build artifacts
+# ----------------------------------------------------------
+# Rust / Tauri build artifacts
+# ----------------------------------------------------------
 src-tauri/target/
 
-# Frontend build artifacts
+# ----------------------------------------------------------
+# Frontend build & dependencies
+# ----------------------------------------------------------
 frontend/node_modules/
 frontend/dist/
+frontend/.cache/
+node_modules/
+dist/
+.cache/
 
-# ZENO runtime data (local only)
+# ----------------------------------------------------------
+# ZENO runtime & user data (local only, never push)
+# ----------------------------------------------------------
 ~/Zeno/
-.agent
-.gemini
-.gsd
+*.db
+*.sqlite
+*.sqlite3
+*.log
+*.logs/
+logs/
+
+# ----------------------------------------------------------
+# Agent / AI tool config dirs (local scaffolding only)
+# ----------------------------------------------------------
+.agent/
+.gemini/
+.gsd/
+
+# ----------------------------------------------------------
+# Temporary / scratch files
+# ----------------------------------------------------------
+*.tmp
+*.temp
+*.bak
+*.orig
+scratch/
+tmp/
