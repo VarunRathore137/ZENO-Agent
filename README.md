@@ -2,6 +2,8 @@
 
 # ⚡ ZENO — Your Personal AI Assistant
 
+<img width="2200" height="1006" alt="ZENO" src="https://github.com/user-attachments/assets/e0c37f02-b438-45e5-a48d-b2b62719fe16" />
+
 **Voice-first. Privacy-first. Locally-running.**
 
 A developer-grade AI personal assistant that listens, thinks, and acts — all on your machine.
