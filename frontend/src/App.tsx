@@ -6,16 +6,28 @@ import Dashboard from './components/Dashboard';
 import BriefingPanel from './components/BriefingPanel';
 import Settings from './components/Settings';
 import Overlay from './components/Overlay';
+import SudoPopup, { SudoRequest } from './components/SudoPopup';
+import ToastContainer, { ToastItem } from './components/Toast';
 import { useDaemonWs } from './hooks/useDaemonWs';
+import type { ZenoState } from './components/ArcReactor';
 import './index.css';
 
 type View = 'dashboard' | 'briefing' | 'tasks' | 'settings';
 const isOverlay = window.location.hash === '#/overlay';
 
 export default function App() {
-  const [view, setView]         = useState<View>('dashboard');
-  const [apiBase, setApiBase]   = useState('http://127.0.0.1:8766');
-  const [ttsActive, setTtsActive] = useState(false);
+  const [view, setView]           = useState<View>('dashboard');
+  const [apiBase, setApiBase]     = useState('http://127.0.0.1:8766');
+  const [zenoState, setZenoState] = useState<ZenoState>('idle');
+  const [sudoRequests, setSudoRequests] = useState<SudoRequest[]>([]);
+  const [toasts, setToasts]       = useState<ToastItem[]>([]);
+
+  // Show the Tauri window as soon as React has mounted.
+  useEffect(() => {
+    import('@tauri-apps/api/window')
+      .then(({ getCurrentWindow }) => getCurrentWindow().show())
+      .catch(() => {}); // not running inside Tauri — ignore
+  }, []);
 
   // Resolve API base from Tauri
   useEffect(() => {
@@ -28,7 +40,6 @@ export default function App() {
   useEffect(() => {
     if (isOverlay) return;
     const unlisten = listen<Record<string, unknown>>('daemon_state', (ev) => {
-      // Re-poll /system automatically; nothing specific needed here
       console.log('[ZENO] daemon_state:', ev.payload);
     });
     return () => { unlisten.then(f => f()); };
@@ -37,13 +48,44 @@ export default function App() {
   // WebSocket real-time events from Python daemon
   useDaemonWs((msg) => {
     if (msg.type === 'overlay_show') {
-      // Python daemon sent overlay trigger — show overlay window via Tauri
       invoke('show_overlay_window').catch(console.error);
     }
+    if (msg.type === 'zeno_state') {
+      setZenoState((msg.state as ZenoState) ?? 'idle');
+    }
     if (msg.type === 'tts_active') {
-      setTtsActive(Boolean(msg.active));
+      setZenoState(Boolean(msg.active) ? 'speaking' : 'idle');
+    }
+    if (msg.type === 'sudo_request') {
+      const req: SudoRequest = {
+        id: String(msg.id),
+        command: String(msg.command || ''),
+        expires_in: Number(msg.expires_in || 60),
+      };
+      setSudoRequests(prev => [...prev.filter(r => r.id !== req.id), req]);
+    }
+    if (msg.type === 'reminder_fire') {
+      const toast: ToastItem = {
+        id: String(msg.id || Date.now()),
+        message: String(msg.message || ''),
+        title: msg.title ? String(msg.title) : 'REMINDER',
+        type: (msg.toast_type as any) || 'reminder',
+      };
+      setToasts(prev => [...prev, toast]);
+      // Auto-dismiss after 8 seconds
+      setTimeout(() => {
+        setToasts(prev => prev.filter(t => t.id !== toast.id));
+      }, 8000);
     }
   });
+
+  const handleDismissToast = (id: string) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  };
+
+  const handleHandledSudo = (id: string) => {
+    setSudoRequests(prev => prev.filter(r => r.id !== id));
+  };
 
   if (isOverlay) return <Overlay />;
 
@@ -72,7 +114,7 @@ export default function App() {
       <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', flex: 1 }}>
         <SystemBar apiBase={apiBase} />
         <main className="main-content" style={{ flex: 1, overflow: 'hidden' }}>
-          {view === 'dashboard' && <Dashboard apiBase={apiBase} ttsActive={ttsActive} />}
+          {view === 'dashboard' && <Dashboard apiBase={apiBase} zenoState={zenoState} />}
           {view === 'briefing'  && <BriefingPanel apiBase={apiBase} />}
           {view === 'tasks'     && (
             <div id="tasks-view" style={{ padding: '16px 20px' }}>
@@ -86,6 +128,17 @@ export default function App() {
           {view === 'settings'  && <Settings apiBase={apiBase} />}
         </main>
       </div>
+
+      {/* Floating Notification & Authorization Layers */}
+      <SudoPopup
+        apiBase={apiBase}
+        requests={sudoRequests}
+        onHandled={handleHandledSudo}
+      />
+      <ToastContainer
+        toasts={toasts}
+        onDismiss={handleDismissToast}
+      />
     </div>
   );
 }

@@ -8,27 +8,48 @@ try:
 except ImportError:
     _WS_AVAILABLE = False
 
-# PORT IS HARDCODED — if changed here, also change WS_URL in zeno/extension/background.js.
-# These two constants must always match. Search for "8765" to find both locations.
+# PORT IS HARDCODED — if changed here, also change WS_URL in zeno/extension/background.js
+# and useDaemonWs.ts in the React frontend.
+# These constants must always match. Search for "8767" to find all locations.
+# Port map: 8765 = OS Agent (FastAPI) | 8766 = REST API (FastAPI) | 8767 = Browser WS (this)
 HOST = "localhost"
-PORT = 8765
+PORT = 8767
+
+
+_ws_instance = None
+_ws_loop = None
+
+
+def broadcast_state(state: str) -> None:
+    """Thread-safe broadcast of ZENO state to all connected React frontend clients."""
+    if _ws_instance is None or _ws_loop is None:
+        return
+    try:
+        asyncio.run_coroutine_threadsafe(
+            _ws_instance.broadcast({"type": "zeno_state", "state": state}),
+            _ws_loop,
+        )
+    except Exception:
+        pass
+
+
+def broadcast_event(payload: dict) -> None:
+    """Thread-safe broadcast of any JSON payload to all connected clients."""
+    if _ws_instance is None or _ws_loop is None:
+        return
+    try:
+        asyncio.run_coroutine_threadsafe(
+            _ws_instance.broadcast(payload),
+            _ws_loop,
+        )
+    except Exception:
+        pass
 
 
 class BrowserWebSocketServer:
     """
-    Listens on ws://localhost:8765 for browser extension events.
-
-    Message types (defined in zeno/extension/background.js):
-      tab_open  → {type, browser, domain, page_title, url_category, started_at}
-      tab_close → {type, domain, dwell_seconds}
-      ping      → {type}   (keepalive — no-op)
-
-    Privacy:
-      - Excluded domains (browser_domain in privacy_exclusions) → dropped silently.
-      - page_title → stored as-is unless matched by window_title_pattern exclusion,
-        or unless send_page_title=False in config, in which case stored as ''.
+    Listens on ws://localhost:8767 for browser extension and React frontend events.
     """
-
     def __init__(self, db_path: str, send_page_title: bool = True) -> None:
         self._db_path = db_path
         self._send_page_title = send_page_title   # from config.yaml browser_extension.send_page_title
@@ -43,6 +64,14 @@ class BrowserWebSocketServer:
         if not _WS_AVAILABLE:
             print("[WSServer] 'websockets' not installed — browser tracking disabled.", file=sys.stderr)
             return
+
+        global _ws_instance, _ws_loop
+        _ws_instance = self
+        try:
+            _ws_loop = asyncio.get_running_loop()
+        except RuntimeError:
+            _ws_loop = asyncio.get_event_loop()
+
         self._server = await websockets.serve(self._handle, HOST, PORT)
         print(f"[WSServer] Listening on ws://{HOST}:{PORT}")
 

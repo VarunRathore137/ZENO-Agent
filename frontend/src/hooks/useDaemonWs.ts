@@ -11,7 +11,9 @@ export function useDaemonWs(onMessage: Handler) {
     // Don't connect in overlay window — it doesn't need the WS
     if (window.location.hash === '#/overlay') return;
 
-    const ws = new WebSocket('ws://localhost:8765');
+    // Port 8767 = BrowserWebSocket (Python daemon)
+    // Port 8765 = OS Agent (FastAPI) — different service, don't connect here
+    const ws = new WebSocket('ws://localhost:8767');
     wsRef.current = ws;
 
     ws.onopen = () => {

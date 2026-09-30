@@ -75,7 +75,7 @@ class GeminiProvider:
     Best for: intent slot filling, quick disambiguation, low-latency tasks.
     """
 
-    DEFAULT_MODEL = "gemini-1.5-flash"
+    DEFAULT_MODEL = os.environ.get("ZENO_GEMINI_MODEL", "gemini-3.8-flash")
 
     def __init__(self, api_key: str | None = None, model: str | None = None) -> None:
         self._api_key = api_key or os.environ.get("GOOGLE_API_KEY", "")

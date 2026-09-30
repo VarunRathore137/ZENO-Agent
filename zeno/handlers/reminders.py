@@ -17,6 +17,17 @@ def handle_set_reminder(intent: ParsedIntent, conn: sqlite3.Connection) -> str:
     """
     conn.execute(query, (message[:50], message, trigger_at))
     
+    try:
+        from zeno.monitor.ws_server import broadcast_event
+        broadcast_event({
+            "type": "reminder_fire",
+            "message": message,
+            "title": "REMINDER RECORDED",
+            "toast_type": "reminder",
+        })
+    except Exception:
+        pass
+
     response = "Reminder set."
     if trigger_at:
         response += f" I'll notify you at {trigger_at}."

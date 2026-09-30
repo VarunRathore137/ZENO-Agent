@@ -1,6 +1,8 @@
+# ── Core ZENO (voice pipeline, NLP, scheduler) ────────────────────────────────
 openai-whisper
 sounddevice
 openwakeword
+webrtcvad-wheels
 numpy
 pynput
 pyaudio
@@ -18,3 +20,18 @@ google-genai
 elevenlabs
 fastapi[standard]>=0.115
 uvicorn[standard]>=0.30
+
+# ── OS Agent tools (ported from Elysia) ────────────────────────────────────────
+playwright           # Browser automation (CDP + managed modes)
+pytesseract          # OCR for readScreen / analyzeScreenshot
+Pillow               # Screenshot capture + image processing
+pyperclip            # Cross-platform clipboard read/write
+pyautogui            # Keyboard/mouse simulation (osType, osPress, osClick)
+pycaw                # Windows audio control (volume via COM API)
+Send2Trash           # Safe file deletion (trash instead of permanent delete)
+nvidia-ml-py3        # NVIDIA GPU stats (gpuInfo tool)
+
+# ── Google Suite integration ───────────────────────────────────────────────────
+google-auth-oauthlib          # OAuth 2.0 flow for Gmail/Calendar/Tasks
+google-auth-httplib2          # HTTP transport for Google APIs
+google-api-python-client      # Google Calendar, Gmail, Tasks REST client

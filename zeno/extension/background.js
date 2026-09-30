@@ -10,7 +10,7 @@
 //
 // page_title is sent; redaction happens server-side per privacy_exclusions.
 
-const WS_URL = "ws://localhost:8765";   // Must match zeno/monitor/ws_server.py PORT = 8765
+const WS_URL = "ws://localhost:8767";   // Must match zeno/monitor/ws_server.py PORT = 8767
 const PING_INTERVAL_MS   = 30_000;
 const RECONNECT_DELAY_MS = 5_000;
 const MAX_RECONNECT_ATTEMPTS = 10;

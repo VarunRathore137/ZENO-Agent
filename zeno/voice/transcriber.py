@@ -21,14 +21,42 @@ class WhisperTranscriber:
             print(f"Error loading Whisper model '{model_name}': {e}", file=sys.stderr)
             raise
 
-    def transcribe(self, audio: np.ndarray, language: str = "en") -> str:
+    def transcribe(
+        self,
+        audio: np.ndarray,
+        language: str = "en",
+        no_speech_threshold: float = 0.5,
+        initial_prompt: str | None = None,
+    ) -> str:
         """
         Transcribe a float32 numpy array (16kHz mono).
-        Returns the transcript string.
+        Returns the transcript string, or "" if Whisper is not confident
+        that the audio contains speech (no_speech_prob > no_speech_threshold).
+
+        Args:
+            initial_prompt: Optional text to bias Whisper's vocabulary.
+                            E.g. "Hey Zeno, Okay Zeno" makes Whisper more
+                            likely to output those words for similar sounds.
         """
         try:
             # fp16=False forces CPU-safe mode
-            result = self._model.transcribe(audio, language=language, fp16=False)
+            # condition_on_previous_text=False stops Whisper from hallucinating YouTube subtitles ("Thanks for watching")
+            result = self._model.transcribe(
+                audio,
+                language=language,
+                fp16=False,
+                initial_prompt=initial_prompt,
+                condition_on_previous_text=False,
+            )
+
+            # Reject clips Whisper itself thinks have no speech.
+            # This filters out background TV / ambient noise transcriptions.
+            segments = result.get("segments", [])
+            if segments:
+                avg_no_speech = sum(s.get("no_speech_prob", 0.0) for s in segments) / len(segments)
+                if avg_no_speech > no_speech_threshold:
+                    return ""
+
             text = result.get("text", "").strip()
             return text
         except Exception as e:

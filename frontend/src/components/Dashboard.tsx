@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import {
-  AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip,
+  AreaChart, Area, XAxis, YAxis, Tooltip,
   CartesianGrid, ResponsiveContainer, Legend,
 } from 'recharts';
 import ArcReactor from './ArcReactor';
+import type { ZenoState } from './ArcReactor';
+import CharacterVisualizer from './CharacterVisualizer';
 import { useApi } from '../hooks/useApi';
 
 interface AnalyticsRow {
@@ -24,7 +26,7 @@ interface SystemData {
   gpu_percent: number | null;
 }
 
-interface Props { apiBase: string; ttsActive: boolean; }
+interface Props { apiBase: string; zenoState: ZenoState; }
 
 const TOOLTIP_STYLE = {
   background: '#080d18', border: '1px solid rgba(0,212,255,0.3)',
@@ -32,10 +34,19 @@ const TOOLTIP_STYLE = {
   fontFamily: 'Share Tech Mono, monospace',
 };
 
-export default function Dashboard({ apiBase, ttsActive }: Props) {
+export default function Dashboard({ apiBase, zenoState }: Props) {
   const { data: analytics } = useApi<{ analytics: AnalyticsRow[] }>(`${apiBase}/analytics`, 60000);
   const { data: tasksData }  = useApi<{ tasks: TaskRow[] }>(`${apiBase}/tasks`, 30000);
   const { data: sysData }    = useApi<SystemData>(`${apiBase}/system`, 5000);
+
+  const [visualMode, setVisualMode] = useState<'reactor' | 'character'>(() => {
+    return (localStorage.getItem('zeno_visual_mode') as 'reactor' | 'character') || 'reactor';
+  });
+
+  const toggleVisualMode = (mode: 'reactor' | 'character') => {
+    setVisualMode(mode);
+    localStorage.setItem('zeno_visual_mode', mode);
+  };
 
   const rows = analytics?.analytics ?? [];
   const tasks = tasksData?.tasks ?? [];
@@ -54,14 +65,36 @@ export default function Dashboard({ apiBase, ttsActive }: Props) {
   return (
     <div id="dashboard-view" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Top section: Arc reactor + System gauges */}
-      <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr', gap: 16, padding: '16px 20px 0' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: visualMode === 'character' ? '280px 1fr' : '240px 1fr', gap: 16, padding: '16px 20px 0', transition: 'grid-template-columns 0.3s ease' }}>
 
-        {/* Arc Reactor */}
+        {/* Visual Core: Arc Reactor or Character Avatar */}
         <div className="panel" style={{ display: 'flex', flexDirection: 'column' }}>
-          <div className="panel-header">
+          <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span className="panel-title">CORE STATUS</span>
+            <div style={{ display: 'flex', gap: 4 }}>
+              <button
+                className={`hud-btn ${visualMode === 'reactor' ? 'primary' : ''}`}
+                style={{ fontSize: 8, padding: '2px 7px' }}
+                onClick={() => toggleVisualMode('reactor')}
+                title="Switch to Arc Reactor"
+              >
+                REACTOR
+              </button>
+              <button
+                className={`hud-btn ${visualMode === 'character' ? 'primary' : ''}`}
+                style={{ fontSize: 8, padding: '2px 7px' }}
+                onClick={() => toggleVisualMode('character')}
+                title="Switch to Persona Avatar"
+              >
+                AVATAR
+              </button>
+            </div>
           </div>
-          <ArcReactor active={ttsActive} size={160} />
+          {visualMode === 'reactor' ? (
+            <ArcReactor state={zenoState} size={160} />
+          ) : (
+            <CharacterVisualizer state={zenoState} onSwitchToReactor={() => toggleVisualMode('reactor')} />
+          )}
         </div>
 
         {/* System gauges */}

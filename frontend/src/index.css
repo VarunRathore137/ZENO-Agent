@@ -311,6 +311,34 @@ body::after {
   50%       { opacity: 1; filter: drop-shadow(0 0 24px #00d4ff) drop-shadow(0 0 48px #00d4ff); }
 }
 
+/* ── Listening state: bright cyan, accelerated spin ── */
+.arc-listening .arc-ring-rotate {
+  animation: arc-spin 2s linear infinite;
+}
+.arc-listening .arc-ring-pulse {
+  animation: arc-pulse 0.8s ease-in-out infinite;
+}
+
+/* ── Thinking state: purple, energetic cadence ── */
+.arc-thinking .arc-ring-rotate {
+  animation: arc-spin 1.5s linear infinite;
+}
+.arc-thinking .arc-ring-pulse {
+  animation: arc-pulse 0.6s ease-in-out infinite;
+}
+
+/* ── Speaking state: vibrant green acoustic feedback ── */
+.arc-speaking .arc-ring-rotate {
+  animation: arc-spin 1s linear infinite;
+}
+.arc-speaking .arc-ring-pulse {
+  animation: arc-speaking-pulse 0.4s ease-in-out infinite;
+}
+@keyframes arc-speaking-pulse {
+  0%, 100% { opacity: 0.7; }
+  50%       { opacity: 1; filter: drop-shadow(0 0 16px #00ff88) drop-shadow(0 0 32px #00ff88); }
+}
+
 .arc-status {
   font-family: var(--font-hud);
   font-size: 10px;
@@ -318,6 +346,30 @@ body::after {
   color: var(--cyan);
   text-shadow: var(--cyan-glow);
   text-transform: uppercase;
+  transition: color 250ms ease, text-shadow 250ms ease;
+}
+
+.arc-status-idle {
+  color: var(--cyan);
+  text-shadow: var(--cyan-glow);
+}
+
+.arc-status-listening {
+  color: #00d4ff;
+  text-shadow: 0 0 12px #00d4ff, 0 0 24px #00d4ff;
+  animation: arc-pulse 1s ease-in-out infinite;
+}
+
+.arc-status-thinking {
+  color: #c084fc;
+  text-shadow: 0 0 12px #a855f7, 0 0 24px #7c3aed;
+  animation: arc-pulse 0.8s ease-in-out infinite;
+}
+
+.arc-status-speaking {
+  color: var(--green);
+  text-shadow: 0 0 12px #00ff88, 0 0 24px #00ff88;
+  animation: arc-pulse 0.5s ease-in-out infinite;
 }
 
 /* ─── GAUGE BARS ─────────────────────────────────────────────────── */
@@ -483,4 +535,15 @@ body::after {
 .hud-btn.primary {
   background: var(--cyan-dim);
   border-color: var(--cyan);
+}
+
+@keyframes toast-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }

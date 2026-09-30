@@ -10,7 +10,10 @@ Live monitoring:
 """
 import logging
 import sqlite3
+import subprocess
+import sys
 import threading
+import time
 from pathlib import Path
 
 import psutil
@@ -42,6 +45,70 @@ _state: dict = {
     "stop_event": None,        # set by ZenoDaemonAPI.start(); checked by /daemon/shutdown
 }
 
+# ---------------------------------------------------------------------------
+# GPU query cache — avoids calling nvidia-smi on every dashboard poll.
+# nvidia-smi can cause a Windows error dialog (0xc0000142) when drivers
+# are not yet initialised (e.g. at boot).  We cache for 30 s and always
+# use CREATE_NO_WINDOW so no dialog ever appears.
+# ---------------------------------------------------------------------------
+_gpu_cache: dict = {"value": None, "ts": 0.0}
+_GPU_CACHE_TTL = 30.0        # seconds
+
+
+def _query_gpu_percent() -> int | None:
+    """Run nvidia-smi silently and return GPU % or None.
+
+    Uses two layers of Windows dialog suppression:
+    1. CREATE_NO_WINDOW — hides any console window the process would open.
+    2. SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX) — tells
+       Windows NOT to show the 'Application Error (0xc0000142)' dialog when
+       a child process fails to initialise its DLLs.  This is the only way
+       to suppress that dialog; CREATE_NO_WINDOW alone does not prevent it.
+    Results are cached for 30 s to avoid hammering nvidia-smi.
+    """
+    now = time.monotonic()
+    if now - _gpu_cache["ts"] < _GPU_CACHE_TTL:
+        return _gpu_cache["value"]          # return cached value
+
+    gpu_pct = None
+    try:
+        flags = 0
+        old_error_mode = None
+        if sys.platform == "win32":
+            import ctypes
+            SEM_FAILCRITICALERRORS  = 0x0001
+            SEM_NOGPFAULTERRORBOX   = 0x0002
+            flags = subprocess.CREATE_NO_WINDOW
+            # Suppress WER dialog for child process DLL init failures
+            old_error_mode = ctypes.windll.kernel32.SetErrorMode(
+                SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX
+            )
+        try:
+            result = subprocess.run(
+                ["nvidia-smi", "--query-gpu=utilization.gpu", "--format=csv,noheader,nounits"],
+                capture_output=True,
+                text=True,
+                timeout=2,
+                creationflags=flags,
+            )
+            if result.returncode == 0:
+                raw = result.stdout.strip().split()[0]
+                if raw.isdigit():
+                    gpu_pct = int(raw)
+        finally:
+            # Always restore the original error mode
+            if old_error_mode is not None:
+                import ctypes as _ctypes
+                _ctypes.windll.kernel32.SetErrorMode(old_error_mode)
+    except FileNotFoundError:
+        pass   # nvidia-smi not installed — GPU simply not reported
+    except Exception:
+        pass   # driver crash, timeout, etc. — return None quietly
+
+    _gpu_cache["value"] = gpu_pct
+    _gpu_cache["ts"] = now
+    return gpu_pct
+
 
 def _db(db_path: str) -> sqlite3.Connection:
     conn = sqlite3.connect(db_path, check_same_thread=False)
@@ -70,18 +137,8 @@ def get_system():
     net_bytes_sent = net.bytes_sent
     net_bytes_recv = net.bytes_recv
 
-    # GPU: psutil doesn't support GPU natively; attempt via WMI on Windows
-    gpu_pct = None
-    try:
-        import subprocess
-        result = subprocess.run(
-            ["nvidia-smi", "--query-gpu=utilization.gpu", "--format=csv,noheader,nounits"],
-            capture_output=True, text=True, timeout=1
-        )
-        if result.returncode == 0:
-            gpu_pct = int(result.stdout.strip().split()[0])
-    except Exception:
-        pass  # No GPU or nvidia-smi not present — returns null in response
+    # GPU — uses cached, silent helper (never pops an error dialog)
+    gpu_pct = _query_gpu_percent()
 
     return {
         "cpu_percent": cpu,
@@ -207,6 +264,63 @@ def shutdown_daemon():
     if stop_event is not None:
         stop_event.set()
     return {"status": "shutting_down"}
+
+
+# ---------------------------------------------------------------------------
+# Memory Core Endpoints (Phase 5.2)
+# ---------------------------------------------------------------------------
+@app.get("/api/memories")
+def get_memories():
+    """Return all persistent memory records."""
+    from zeno.ai.memory import load_memories
+    memories = load_memories()
+    return {"memories": memories, "total": len(memories)}
+
+
+@app.post("/api/memories")
+def add_memory(payload: dict):
+    """Manually add or update a memory record."""
+    from fastapi import HTTPException
+    from zeno.ai.memory import save_memory_item, CATEGORIES
+    category = payload.get("category", "")
+    text = payload.get("text", "").strip()
+    if category not in CATEGORIES:
+        raise HTTPException(400, f"Invalid category. Must be one of: {CATEGORIES}")
+    if not text:
+        raise HTTPException(400, "text is required")
+    mem_id = payload.get("id")
+    saved_id = save_memory_item(category, text, memory_id=mem_id)
+    return {"ok": True, "id": saved_id}
+
+
+@app.delete("/api/memories/{mem_id}")
+def remove_memory(mem_id: str):
+    """Delete a memory by ID."""
+    from zeno.ai.memory import delete_memory
+    delete_memory(mem_id)
+    return {"ok": True, "id": mem_id}
+
+
+# ---------------------------------------------------------------------------
+# Sudo Confirmation Endpoints (Phase 5.3)
+# ---------------------------------------------------------------------------
+@app.post("/api/sudo/confirm/{cmd_id}")
+def sudo_confirm(cmd_id: str, payload: dict):
+    """Approve or reject a pending sudo execution from the React UI."""
+    from fastapi import HTTPException
+    from zeno.agent.registry import STATE
+    action = payload.get("action", "").lower()
+    if cmd_id not in STATE.sudo_commands:
+        raise HTTPException(404, "Sudo request expired or not found")
+
+    entry = STATE.sudo_commands[cmd_id]
+    if action == "approve":
+        entry["approved"] = True
+    else:
+        entry["rejected"] = True
+        STATE.sudo_commands.pop(cmd_id, None)
+
+    return {"ok": True, "action": action, "command": entry.get("command", "")}
 
 
 # ---------------------------------------------------------------------------
