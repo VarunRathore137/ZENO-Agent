@@ -129,7 +129,7 @@ def _gemini_converse(user_text: str) -> str:
             f"User: {user_text}"
         )
         response = _gemini_client.models.generate_content(
-            model="gemini-1.5-flash",
+            model="gemini-2.0-flash",
             contents=prompt,
         )
         return (response.text or "").strip()
@@ -226,8 +226,11 @@ class VoiceLoop:
         # speech frequency patterns (formants/harmonics) — NOT volume levels.
         # This is necessary because this mic's DSP normalises all audio to similar RMS.
         VAD_CLIP_SECS    = 1.5    # shorter window = faster detection
-        WEBRTC_VAD_MODE  = 1      # 0=least aggressive, 3=most aggressive
-        SPEECH_FRAME_MIN = 4      # need ≥4 consecutive speech frames
+        WEBRTC_VAD_MODE  = 2      # 0=least aggressive, 3=most aggressive
+                                  # Mode 2 is much better for laptop mics with DSP/AGC
+                                  # (mode 1 was firing on keyboard noise and ambient audio)
+        SPEECH_FRAME_MIN = 6      # need ≥6 CONSECUTIVE speech frames (~120ms of real speech)
+                                  # Was 4 — too low, caught keyboard clatter and TV noise
 
         # Initialise webrtcvad — fall back to RMS if unavailable
         _webrtc_vad = None
@@ -239,7 +242,7 @@ class VoiceLoop:
             logger.warning("VoiceLoop: webrtcvad unavailable (%s) — falling back to RMS gating", e)
 
         def _has_speech_webrtc(audio_f32: np.ndarray) -> bool:
-            """Return True if webrtcvad detects at least SPEECH_FRAME_MIN speech frames."""
+            """Return True if webrtcvad detects SPEECH_FRAME_MIN consecutive speech frames."""
             # webrtcvad needs int16 PCM at 16kHz in exact 10/20/30ms frames
             FRAME_MS      = 20                   # 20 ms frames
             FRAME_SAMPLES = 16000 * FRAME_MS // 1000   # = 320 samples
@@ -252,6 +255,8 @@ class VoiceLoop:
                         speech_count += 1
                         if speech_count >= SPEECH_FRAME_MIN:
                             return True
+                    else:
+                        speech_count = 0  # reset — require CONSECUTIVE frames
                 except Exception:
                     pass
             return False
@@ -283,7 +288,9 @@ class VoiceLoop:
                         continue  # no speech patterns detected — skip Whisper call
                 else:
                     # Fallback: plain RMS gate (less accurate)
-                    if float(np.sqrt(np.mean(clip ** 2))) < 0.0003:
+                    # 0.003 is 10x tighter than the old value — prevents Intel Smart Sound
+                    # mic's AGC from normalizing keyboard noise up to voice levels
+                    if float(np.sqrt(np.mean(clip ** 2))) < 0.003:
                         continue
 
                 try:

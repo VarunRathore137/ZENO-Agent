@@ -120,7 +120,11 @@ fn start_ws_listener(app_handle: tauri::AppHandle) {
             .expect("Failed to create tokio runtime");
 
         rt.block_on(async move {
-            let url = "ws://127.0.0.1:8765";
+            // Port map:
+            // 8765 = OS Agent (FastAPI HTTP — NOT a WebSocket server)
+            // 8766 = REST API (FastAPI HTTP)
+            // 8767 = ZENO WebSocket server (state events, browser ext, frontend)
+            let url = "ws://127.0.0.1:8767";
 
             loop {
                 tokio::time::sleep(std::time::Duration::from_secs(2)).await;

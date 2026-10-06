@@ -59,17 +59,19 @@ def _matches_transcript(transcript: str) -> bool:
         from rapidfuzz import fuzz
         for phrase in ZENO_WAKE_PHRASES:
             # partial_ratio: checks if phrase appears as a fuzzy substring
-            if fuzz.partial_ratio(phrase, t) >= 70:
+            # 85 is much tighter than 70 — prevents TV audio, keyboard noise,
+            # or random words from fuzzy-matching wake phrases
+            if fuzz.partial_ratio(phrase, t) >= 85:
                 return True
-        # Also check individual words / n-grams for "zeno/zen" phonetic variants
-        # e.g. "you know", "is it no" -> common Whisper-tiny mishears for "Hey Zeno"
-        zeno_variants = ["zeno", "zen", "xeno", "zenith", "lino", "you know", "is it no", "it no"]
+        # Word-level zeno variant check — only fire on strong matches
+        # Removed "you know", "is it no", "it no", "lino" — too ambiguous
+        zeno_variants = ["zeno", "zen", "xeno", "zenith"]
         words = t.split()
         for word in words:
             for variant in zeno_variants:
-                if fuzz.ratio(word, variant) >= 65:
+                if fuzz.ratio(word, variant) >= 80:
                     return True
-        # Check phrase against variants as well
+        # Exact substring check for the unambiguous core variants only
         for variant in zeno_variants:
             if variant in t:
                 return True
