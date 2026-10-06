@@ -1,18 +1,18 @@
 <div align="center">
 
-# ⚡ ZENO — Your Personal AI Assistant
+# ⚡ ZENO 2.0 — Your Personal AI Assistant
 
 <img width="2200" height="1006" alt="ZENO" src="https://github.com/user-attachments/assets/e0c37f02-b438-45e5-a48d-b2b62719fe16" />
 
-**Voice-first. Privacy-first. Locally-running.**
+**Voice-first. Memory-driven. Locally-running.**
 
-A developer-grade AI personal assistant that listens, thinks, and acts — all on your machine.
+A developer-grade AI personal assistant that listens, thinks, remembers, and acts — all on your machine.
 
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![Rust](https://img.shields.io/badge/Rust-Tauri_2-000000?style=for-the-badge&logo=rust&logoColor=white)](https://tauri.app)
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
 [![SQLite](https://img.shields.io/badge/SQLite-WAL_Mode-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://sqlite.org)
-[![Gemini](https://img.shields.io/badge/Google-Gemini_API-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev)
+[![Gemini](https://img.shields.io/badge/Google-Gemini_2.0-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
 </div>
@@ -21,85 +21,132 @@ A developer-grade AI personal assistant that listens, thinks, and acts — all o
 
 ## 🧠 What is ZENO?
 
-ZENO (**Z**ero-overhead **E**xecution & **N**atural **O**rchestration) is a **voice-first, locally-running personal AI assistant** built for developers and knowledge workers who want something smarter than a timer app but more private than a cloud assistant.
+ZENO (**Z**ero-overhead **E**xecution & **N**atural **O**rchestration) is a **voice-first, locally-running personal AI assistant** built for developers and knowledge workers.
 
-Say `"Hey Zeno"` and ZENO wakes up, transcribes your speech using OpenAI Whisper, classifies your intent using a rule-based NLP engine (falling back to Google Gemini for complex requests), and dispatches the action — whether that's adding a task, starting a deep work session, launching your workspace, or generating a full PRD document.
+Say `"Hey Zeno"` — ZENO wakes up, transcribes your speech, classifies your intent, and dispatches the action. Whether that's launching Spotify, adding a task, starting a deep work session, or generating a full PRD — it just works.
 
-> **All your data stays on your machine.** The only external calls are to Google Gemini (for reasoning-heavy tasks) and optionally ElevenLabs (for premium voice).
+ZENO 2.0 adds a **persistent AI memory engine**, **Gemini Live real-time streaming**, a complete **90+ tool OS agent**, and a polished **sci-fi HUD** with a character visualizer, memory dashboard, and secure command authorization.
+
+> **All your data stays on your machine.** External calls are limited to Google Gemini (reasoning + live voice) and optionally ElevenLabs (TTS).
+
+---
+
+## ✨ What's New in ZENO 2.0
+
+### 🧠 Persistent AI Memory Engine
+ZENO now **remembers you across every session** — automatically. After each conversation turn, Gemini analyzes the dialogue and extracts durable facts stored in SQLite. Memory is injected naturally into every system prompt — no robotic "According to my records..." — just a conversation with someone who knows you.
+
+**7 memory categories:** Identity · Preferences · Goals · Projects · Relationships · Emotional · Behavior
+
+### 🎙️ Gemini Live — Real-Time Voice Streaming
+A brand-new voice mode using Google's bidirectional audio streaming API. Near-instant responses, always-on listening, no wake word required.
+
+```bash
+python -m zeno --live    # Gemini Live mode
+python -m zeno           # Whisper mode (offline, private — default)
+```
+
+### 🛠️ 90+ OS Automation Tools
+A complete tool agent with dispatchers for every major OS action:
+- **App control** — Spotify, Discord, Chrome, VS Code, Steam, VLC, Zoom, Slack, and more
+- **Browser automation** — open URLs, search YouTube, navigate to sites
+- **System control** — volume, brightness, screenshots, OCR screen reading
+- **File operations** — create, read, search, safe-delete
+- **Clipboard, window management, OS input simulation**
+- **Terminal execution** — with a safety blacklist for destructive commands
+
+### 🎭 Character Visualizer
+Swap the ArcReactor for an animated character overlay synced to ZENO's voice state. Drop your own `idle.mp4`, `thinking.mp4`, `talking.mp4` clips into `frontend/public/assets/` and the overlay comes alive.
+
+### 💾 Memory Dashboard
+A full UI panel to inspect, add, and delete what ZENO remembers about you — with category filters, timestamps, and direct SQLite CRUD via the REST API.
+
+### 🔒 SudoPopup — Elevated Command Authorization
+Dangerous terminal commands require a two-phase UI confirmation with a 60-second countdown timer before execution. No more accidental destructive operations.
+
+### 🔔 Reminder Toast Notifications
+Real-time reminder toasts pushed directly to the HUD via WebSocket — no polling, instant delivery.
 
 ---
 
 ## ✨ Core Features
 
 ### 🎙️ Voice Pipeline
-- **Wake word detection** — Say `"Hey Zeno"`, `"Okay Zeno"`, or `"Hi Zen"` to activate
-- **Hotkey activation** — `Ctrl+Shift+Space` for instant brain dump overlay; `Ctrl+Shift+J` for push-to-talk
-- **OpenAI Whisper STT** — Local, offline speech transcription (configurable model size)
-- **Multi-intent splitting** — `"Add task fix login bug and remind me at 5pm"` → two actions, one command
-- **Clarification dialog** — If confidence < 0.75, ZENO asks before acting
+
+| Feature | Whisper Mode (default) | Live Mode (`--live`) |
+|---|---|---|
+| **Start** | `python -m zeno` | `python -m zeno --live` |
+| **Activation** | Wake word or hotkey | Always-on stream |
+| **Speed** | ~2–3s after speaking | Near-instant |
+| **Internet** | ❌ 100% offline | ✅ Gemini API |
+| **Privacy** | Audio never leaves machine | Audio goes to Google |
+
+**Wake phrases:** `"Hey Zeno"` · `"Okay Zeno"` · `"Yo Zeno"` · `"Hi Zen"` · `"Hello Zeno"` · `"Hey Zenith"`
+
+**Hotkeys:** `Ctrl+Shift+Space` — brain dump overlay · `Ctrl+Shift+J` — push-to-talk
+
+**Dual-path wake detection:**
+- **Acoustic path** — `openWakeWord` fires instantly on audio signature
+- **Transcript path** — `Whisper-tiny` + `WebRTC VAD` scans every 1.5s as fallback (mode 2, consecutive-frame speech gate)
 
 ### 📋 Task Management
-- Add, update, complete, and delete tasks by voice
-- Assign priorities (`high`, `medium`, `low`), due dates, and project tags
-- Full task lifecycle audit trail stored in SQLite
-- Query: `"What are my high-priority tasks for today?"`
+- Add, update, complete, defer, and flag tasks by voice
+- Priorities (`high` · `medium` · `low`), due dates, project tags, blockers
+- Full task lifecycle audit trail in SQLite
+- *"Hey Zeno, what are my high-priority tasks for today?"*
 
 ### ⏰ Reminders & Scheduling
 - One-time, recurring, and context-sensitive reminders
 - Full calendar scheduling with time blocks
-- Schedule re-routing when plans change — ZENO proposes alternatives
 - APScheduler-powered — works even when the HUD is closed
-- Morning briefing delivered at startup or a configured time
+- Real-time toast notifications pushed to the HUD
 
 ### 🗂️ Session Management
-- ZENO tracks your daily work sessions with memory state
-- At shutdown, it prompts for notes and saves a summary
-- At startup, it resumes from where you left off — pending items, context, and all
+- Tracks daily work sessions with memory state
+- Shutdown ritual saves a session summary
+- Resumes with context — pending items and all
 
 ### 💼 Workspace Macros
 - Define multi-step workspace setups in `workspaces.yaml`
-- `"Hey Zeno, start my coding workspace"` → launches VS Code, opens your browser, arranges windows, toggles DND
-- Safe execution: only whitelisted apps can be launched (no arbitrary shell commands)
-- **Step types:** `open_app`, `open_url`, `focus_window`, `arrange_windows`, `toggle_dnd`, `announce`, `wait_ms`
+- *"Hey Zeno, start my coding workspace"* → launches VS Code, opens GitHub, toggles DND
+- **Step types:** `open_app` · `open_url` · `focus_window` · `arrange_windows` · `toggle_dnd` · `announce` · `wait_ms`
 
 ### 🦆 Rubber Duck Mode — AI-Powered Problem Solving
-ZENO's signature feature. A Socratic conversation mode that guides you through a problem and generates a full PRD document.
+A Socratic conversation that guides you through a problem and generates a full PRD document with extracted tasks.
 
 ```
-You: "Hey Zeno, start rubber duck mode"
+You:  "Hey Zeno, start rubber duck mode"
 Zeno: "What's the problem you're trying to solve?"
-...  [6-phase guided conversation]
+...   [6-phase guided conversation]
 Zeno: "PRD.md generated at ~/Zeno/projects/my-feature/"
       "I've extracted 7 tasks and added them to your task list."
 ```
 
-**Conversation Phases:** `PROBLEM → CONSTRAINTS → EDGE_CASES → DEPENDENCIES → CRITERIA → GENERATING`
+**Phases:** `PROBLEM → CONSTRAINTS → EDGE_CASES → DEPENDENCIES → CRITERIA → GENERATING`
 
 ### 📊 Passive Activity Monitoring
-- Samples your active window every **30 seconds** — app name, window title, input intensity
+- Samples your active window every **30 seconds**
 - Detects context switches and off-task behavior
-- Respects your privacy: all window titles are redacted against your `privacy_exclusions` list
-- Feeds the analytics and morning briefing pipelines
+- Privacy: all window titles redacted against `privacy_exclusions`
+- Feeds analytics and morning briefing pipelines
 
 ### 🌐 Browser Extension
-- Tracks active tabs and domain dwell time via local WebSocket
-- Supports Chrome, Firefox, Edge, and Safari
-- Domain data also redacted per your privacy exclusions
+- Tracks active tabs and domain dwell time via local WebSocket (port 8767)
+- Supports Chrome, Firefox, Edge, Safari
 
-### 📈 Analytics & Insights
-- **Daily briefings** — Generated by Gemini: tasks, schedule, and focus summary
-- **Weekly insights** — Deep work time, distraction breakdown, project distribution
-- **Morning briefing** — Delivered every day at startup or at your configured time
-- **Charts** — Visual analytics via the HUD dashboard (Recharts)
+### 📈 Analytics & Morning Briefing
+- Daily briefings generated by Gemini — tasks, schedule, focus summary
+- Weekly deep work and distraction breakdowns
+- Visual charts in the HUD dashboard (Recharts)
 
 ### 📝 Notes with Full-Text Search
-- `"Hey Zeno, note: check the API rate limits for prod"` → instantly searchable
+- *"Hey Zeno, note: check the API rate limits for prod"*
 - FTS5-powered search across title, content, and tags
 
-### 🔊 Text-to-Speech (TTS)
+### 🔊 Text-to-Speech
 | Engine | Type | Notes |
 |--------|------|-------|
-| `pyttsx3` | Offline | Default, zero latency |
+| `pyttsx3` | Offline | Default, zero latency, dedicated thread |
 | `ElevenLabs` | Cloud (optional) | Premium, natural voice |
 | `Coqui TTS` | Offline (optional) | High-quality local alternative |
 
@@ -108,53 +155,33 @@ Zeno: "PRD.md generated at ~/Zeno/projects/my-feature/"
 ## 🏗️ System Architecture
 
 ```
-┌────────────────────────────────────────────────────────────────────────────────┐
-│                           ZENO – System Overview                               │
-│                                                                                │
-│  ┌──────────────────────┐        ┌────────────────────────────────────────┐   │
-│  │    INPUT SOURCES      │        │           PROCESSING CORE              │   │
-│  │                      │        │                                        │   │
-│  │  Voice + Whisper STT │──────► │  NLP Intent Parser                    │   │
-│  │  (hotword detect,    │        │  (rule-based classify → Gemini fallbk) │   │
-│  │   transcription)     │        │            │                           │   │
-│  │                      │        │            ▼                           │   │
-│  │  Browser Extension   │──────► │  Gemini API Engine                    │   │
-│  │  (tab / dwell track) │  (to   │  (PRD gen, briefings, rubber duck)    │   │
-│  │                      │  SQLite)│           │                           │   │
-│  │  Activity Monitor    │──────► │  Action Dispatcher                    │   │
-│  │  (30-sec samples,    │        │  (routes all intents to handlers)     │   │
-│  │   window/app track)  │        │            │                           │   │
-│  └──────────────────────┘        │            ▼                           │   │
-│                                  │  SQLite Database (Zeno.db)            │   │
-│                                  │  (WAL mode, 22 tables, FTS5)          │   │
-│                                  └────────────────┬───────────────────────┘   │
-│                                                   │                            │
-│                                  ┌────────────────▼───────────────────────┐   │
-│                                  │         EXECUTION LAYER                │   │
-│                                  │                                        │   │
-│                                  │  Macro Engine   TTS Engine             │   │
-│                                  │  (app launch,   (pyttsx3 / ElevenLabs  │   │
-│                                  │   window layout) / Coqui)             │   │
-│                                  │                                        │   │
-│                                  │  Tauri UI Shell  Scheduler             │   │
-│                                  │  (tray, overlay, (APScheduler:         │   │
-│                                  │   charts, dash)  reminders, briefings) │   │
-│                                  └────────────────────────────────────────┘   │
-└────────────────────────────────────────────────────────────────────────────────┘
+python -m zeno [--live]
+│
+├── OS Agent ──────── port 8765 ── 90+ desktop tools (FastAPI + uvicorn)
+├── REST API ──────── port 8766 ── Tasks, memory, sessions, sudo confirm
+├── WebSocket ─────── port 8767 ── State events → React HUD + browser ext
+│
+├─ [Whisper mode — offline]
+│   ├── ZenoMicPump ────────── fan-out mic to 3 parallel queues
+│   ├── ZenoAcousticBridge ── openWakeWord → wake_event  (Path A: fast)
+│   ├── ZenoVadScanner ────── WebRTC VAD + Whisper-tiny  (Path B: reliable)
+│   └── VoiceLoop ─────────── collect audio → Whisper-base → NLP/Gemini → TTS
+│       └── AI Memory ──────── add_to_dialogue() + Gemini extraction post-turn
+│
+└─ [Live mode — --live]
+    └── GeminiLiveSession ─── bidirectional real-time audio → Gemini → tools → TTS
 ```
 
 ### Voice Command Data Flow
 ```
 Microphone
-  → Wake word detection (openwakeword)
-  → Speech transcription (Whisper STT)
-  → Utterance normalisation (lowercase, strip punctuation)
+  → Dual-path wake detection (acoustic + WebRTC VAD transcript)
+  → Speech transcription (Whisper-base STT)
   → Intent classification (NLP Parser, confidence ≥ 0.75)
   → Slot extraction (31 typed slot types)
-  → Action Dispatcher
-  → Handler (DB write / Macro Engine / Gemini API call)
-  → TTS response
-  → voice_interactions log (SQLite)
+  → Action Dispatcher → Handler (DB / OS tool / Gemini API)
+  → AI Memory extraction (async post-turn)
+  → TTS response → voice_interactions log
 ```
 
 ---
@@ -176,32 +203,23 @@ ZENO understands **52 named intents** across **10 categories** with **31 slot ty
 | **Morning Briefing** | `deliver_briefing`, `start_day_planning` |
 | **System Control** | `initiate_shutdown`, `toggle_dnd`, `check_status` |
 
-**Multi-Turn Dialogue State Machines:**
-
-| Flow | States |
-|------|--------|
-| Day Planning | `LOADING → PRESENTING → BLOCKING → CONFIRMING → DONE` |
-| Rubber Duck | `PROBLEM → CONSTRAINTS → EDGE_CASES → DEPS → CRITERIA → GENERATING` |
-| Shutdown Ritual | `CAPTURING → PROMPTING → SAVING → DONE` |
-| Schedule Re-routing | `ANALYSING → PROPOSING → AWAITING → APPLYING` |
-| Clarification | `CLARIFYING → RESOLVED / ABANDONED` |
-
 ---
 
 ## 💾 Database Schema
 
-ZENO uses a local **SQLite database** (`~/Zeno/Zeno.db`) in WAL mode with 22 tables, 4 views, 7 triggers, and 25+ indexes.
+SQLite at `~/Zeno/Zeno.db` — WAL mode, 22 tables, 4 views, 7 triggers, 25+ indexes.
 
 | Section | Tables | Purpose |
 |---------|--------|---------|
 | Core Identity | `user_profile`, `privacy_exclusions` | Config singleton, privacy blocklist |
-| Projects | `projects` | Registry with status, color, and paths |
+| **Memory** | **`memories`** | **Persistent AI memory (7 categories, auto-extracted)** |
+| Projects | `projects` | Registry with status, color, paths |
 | Tasks | `tasks`, `task_dependencies`, `task_history` | Full lifecycle + audit trail |
 | Sessions | `sessions`, `session_pending_items` | Daily sessions with memory state |
 | Time Blocks | `time_blocks`, `schedule_reroutings` | Calendar scheduling |
 | Reminders | `reminders` | One-time, recurring, contextual |
 | Activity | `activity_log`, `browser_sessions`, `context_switches` | 30s passive samples |
-| Analytics | `analytics_weekly`, `analytics_daily`, `behaviour_patterns` | Stats + ML patterns |
+| Analytics | `analytics_weekly`, `analytics_daily`, `behaviour_patterns` | Stats + patterns |
 | Workspaces | `workspaces`, `workspace_steps`, `workspace_activations` | Macro profiles |
 | Voice | `voice_interactions`, `conversations` | Full NLP interaction audit |
 | Notes | `notes` + FTS5 virtual table | Searchable brain dumps |
@@ -216,34 +234,35 @@ ZENO uses a local **SQLite database** (`~/Zeno/Zeno.db`) in WAL mode with 22 tab
 ### Backend (Python 3.11+)
 | Package | Purpose |
 |---------|---------|
-| `google-genai` | Google Gemini API — reasoning, briefings, PRD generation |
-| `openai-whisper` | Local speech-to-text transcription |
-| `openwakeword` | Wake word detection ("Hey Zeno") |
-| `fastapi` + `uvicorn` | REST API server on `localhost:8766` |
-| `websockets` | WebSocket server on port 8765 for browser extension |
-| `apscheduler` | Job scheduling — reminders, briefings, timers |
-| `pyttsx3` | Default offline TTS engine |
-| `sounddevice` | Microphone capture |
-| `rapidfuzz` | Fuzzy task/project name matching |
+| `google-genai` | Gemini 2.0 Flash — reasoning, memory extraction, Live voice |
+| `openai-whisper` | Local offline speech-to-text |
+| `openwakeword` | Acoustic wake word detection |
+| `webrtcvad` | Voice activity detection (consecutive-frame speech gating) |
+| `fastapi` + `uvicorn` | REST API (port 8766) + OS Agent (port 8765) |
+| `websockets` | WebSocket server (port 8767) — state events, browser ext |
+| `apscheduler` | Reminders, briefings, scheduled jobs |
+| `pyttsx3` | Default offline TTS (dedicated COM thread on Windows) |
+| `sounddevice` | Microphone capture (fan-out to multiple consumer queues) |
+| `rapidfuzz` | Fuzzy wake phrase and task name matching |
 | `psutil` | System metrics (CPU, RAM, battery) |
-| `pyyaml` | Parse `config.yaml` and `workspaces.yaml` |
-| `pygetwindow` + `pywin32` | Window detection and OS integration (Windows) |
+| `pyyaml` | Config and workspace macro parsing |
+| `pygetwindow` + `pywin32` | Window management on Windows |
 
 ### Frontend (React 19 + Tauri 2)
 | Package | Purpose |
 |---------|---------|
-| `@tauri-apps/api` | Tauri IPC, window management, system tray |
-| `react` + `react-dom` | Sci-fi HUD UI framework |
-| `vite` | Build tool and dev server |
-| `recharts` | Analytics charts (deep work, distraction) |
-| Vanilla CSS | Custom sci-fi HUD design (Orbitron, Share Tech Mono fonts) |
+| `@tauri-apps/api` | IPC, window management, system tray |
+| `react` + `react-dom` | Sci-fi HUD UI |
+| `vite` | Build tool |
+| `recharts` | Analytics charts |
+| `lucide-react` | Icon library (Memory Dashboard, SudoPopup, etc.) |
+| Vanilla CSS | Custom HUD design (Orbitron, Share Tech Mono fonts) |
 
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-
 - **Python 3.11+**
 - **Rust + Cargo** (for Tauri desktop shell)
 - **Node.js 18+** (for frontend)
@@ -273,7 +292,7 @@ pip install -r requirements.txt
 
 ### 3. Configure your API key
 
-```bash
+```powershell
 # Windows (PowerShell)
 $env:GOOGLE_API_KEY = "your-gemini-api-key-here"
 
@@ -281,32 +300,32 @@ $env:GOOGLE_API_KEY = "your-gemini-api-key-here"
 export GOOGLE_API_KEY="your-gemini-api-key-here"
 ```
 
-> For ElevenLabs premium TTS (optional):
-> ```bash
-> export ELEVENLABS_API_KEY="your-elevenlabs-key-here"
-> ```
-
 ### 4. Initialize the database
 
 ```bash
 python scripts/init_db.py
 ```
 
-### 5. Create your config
+### 5. Run ZENO
 
 ```bash
-python scripts/create_config.py
-```
-
-This creates `~/Zeno/config.yaml` — edit it to set your wake word, timezone, working hours, and preferred TTS engine.
-
-### 6. Run the backend daemon
-
-```bash
+# Offline mode — Whisper STT, 100% private
 python -m zeno
+
+# Live mode — Gemini real-time voice (requires GOOGLE_API_KEY)
+python -m zeno --live
 ```
 
-### 7. Run the frontend (optional HUD)
+You'll see:
+```
+ZENO daemon initializing... [WHISPER MODE]
+[ZENO] 🛠️  OS Agent running on port 8765 — 91 tools available.
+[ZENO] Running in WHISPER mode.
+  OS Agent: port 8765  |  API: port 8766  |  WS: port 8767
+  Say 'Hey Zeno' to give a voice command. Press Ctrl+C to stop.
+```
+
+### 6. Run the frontend HUD (optional)
 
 ```bash
 cd frontend
@@ -342,7 +361,10 @@ zeno:
 
 | Variable | Required | Purpose |
 |----------|----------|---------|
-| `GOOGLE_API_KEY` | ✅ Yes | Google Gemini API authentication |
+| `GOOGLE_API_KEY` | ✅ Yes | Gemini API — AI fallback, memory extraction, Live mode |
+| `ZENO_VOICE_MODE` | Optional | Set to `"live"` to start in Live mode without `--live` flag |
+| `ZENO_DEBUG` | Optional | Set to `"1"` to enable verbose debug logging |
+| `ZENO_AGENT_PORT` | Optional | Override OS Agent port (default: `8765`) |
 | `ELEVENLABS_API_KEY` | Optional | ElevenLabs TTS (only if `tts_engine: elevenlabs`) |
 
 ### Workspace Macros (`~/Zeno/workspaces.yaml`)
@@ -367,14 +389,36 @@ workspaces:
 ## 🗣️ Example Voice Commands
 
 ```
+# App Control
+"Hey Zeno, open Spotify"
+"Hey Zeno, open Chrome"
+"Hey Zeno, close Discord"
+
+# Tasks
 "Hey Zeno, add task: fix the login bug — high priority, due Friday"
-"Hey Zeno, remind me to review the PR at 3pm"
-"Hey Zeno, start my coding workspace"
 "Hey Zeno, what are my tasks for today?"
-"Hey Zeno, start rubber duck mode"      ← generates full PRD
+"Hey Zeno, mark the login bug as done"
+
+# Notes & Brain Dump
 "Hey Zeno, note: check the API rate limits before deploying"
-"Hey Zeno, how much deep work did I do this week?"
-"Hey Zeno, I'm done for the day"        ← triggers shutdown ritual
+"Hey Zeno, search my notes for Redis"
+
+# System
+"Hey Zeno, volume up"
+"Hey Zeno, take a screenshot"
+"Hey Zeno, read my screen"
+
+# Workspaces
+"Hey Zeno, start my coding workspace"
+
+# AI Conversations (Gemini fallback)
+"Hey Zeno, explain how async generators work"
+"Hey Zeno, tell me a joke"
+
+# Planning
+"Hey Zeno, start rubber duck mode"     ← generates full PRD
+"Hey Zeno, what's my schedule today?"
+"Hey Zeno, I'm done for the day"       ← shutdown ritual
 ```
 
 ---
@@ -384,46 +428,73 @@ workspaces:
 ```
 ZENO-Agent/
 ├── zeno/                    # Python backend daemon
-│   ├── ai/                  # Gemini API engine (briefings, PRD, rubber duck)
+│   ├── ai/                  # LLM engine (memory, briefings, rubber duck, PRD)
+│   │   ├── memory.py        # Persistent AI memory — 7-category extraction & injection
+│   │   ├── gemini_live.py   # Gemini Live bidirectional streaming voice
+│   │   ├── providers.py     # LLM provider routing (Gemini / Claude)
+│   │   ├── briefing.py      # Morning briefing generator
+│   │   ├── rubber_duck.py   # 6-state Socratic problem-solving machine
+│   │   ├── prd_writer.py    # PRD generation + task extraction
+│   │   └── prompts.py       # YAML-based prompt loader
+│   ├── agent/               # OS tool agent
+│   │   ├── server.py        # FastAPI tool server (port 8765)
+│   │   ├── dispatch.py      # Tool call dispatcher
+│   │   ├── registry.py      # Tool registration
+│   │   ├── backends/        # OS backends (Windows, macOS, Linux, Wayland)
+│   │   └── tools/           # 90+ OS tools
+│   │       ├── applications.py   # App launch/close + dynamic path resolution
+│   │       ├── browser.py        # Browser + URL control
+│   │       ├── system.py         # CPU, RAM, GPU metrics
+│   │       ├── terminal.py       # Terminal execution (with blacklist + SudoPopup)
+│   │       ├── screenshot.py     # Screenshot + Tesseract OCR screen reading
+│   │       ├── windows.py        # Window management
+│   │       └── ...               # clipboard, files, weather, news, etc.
 │   ├── api/                 # FastAPI REST server (port 8766)
 │   ├── dispatcher/          # Intent → handler routing
 │   ├── handlers/            # Tasks, notes, reminders, sessions, workspaces
-│   ├── macros/              # Workspace macro engine
-│   ├── monitor/             # Activity monitor + WebSocket server
-│   ├── nlp/                 # Intent classification + slot extraction
-│   ├── scheduler/           # APScheduler jobs (reminders, briefings)
+│   ├── monitor/             # Activity monitor + WebSocket server (port 8767)
+│   ├── nlp/                 # Intent classifier + slot extractor
+│   ├── scheduler/           # APScheduler jobs
 │   ├── tts/                 # TTS engine + provider adapters
-│   ├── voice/               # Wake word + Whisper STT pipeline
-│   ├── config.py            # Config loading + DB sync
-│   ├── db.py                # SQLite connection management
-│   └── __main__.py          # Daemon entry point
-├── frontend/                # React + Vite HUD
+│   ├── voice/               # Voice pipeline
+│   │   ├── capture.py       # Mic fan-out to multiple queues
+│   │   ├── wake_word.py     # Wake detection (acoustic + fuzzy transcript)
+│   │   ├── transcriber.py   # Whisper STT
+│   │   ├── hotkeys.py       # Global hotkeys
+│   │   └── gemini_live.py   # Gemini Live streaming session
+│   └── __main__.py          # Daemon entry point (dual wake, TTS thread, WS broadcast)
+├── frontend/                # React + Vite sci-fi HUD
 │   └── src/
-│       ├── components/      # ArcReactor, Dashboard, SystemBar, Overlay, Settings
-│       └── hooks/           # useApi, useDaemonWs
-├── src-tauri/               # Rust Tauri native shell
-├── scripts/                 # Setup scripts (init_db, create_config, check_prereqs)
-├── templates/               # Config file templates
-├── tests/                   # Unit tests (NLP, voice, dispatcher)
-├── zeno_schema.sql          # Full SQLite schema (22 tables)
-├── workspaces.yaml          # Example workspace macro definitions
-├── requirements.txt         # Python runtime dependencies
-├── pyproject.toml           # Python project metadata
-└── ARCHITECTURE.md          # Full system architecture documentation
+│       ├── components/
+│       │   ├── ArcReactor.tsx         # Primary state visualizer
+│       │   ├── CharacterVisualizer.tsx # Anime/video character overlay
+│       │   ├── MemoryDashboard.tsx    # AI memory browser & editor
+│       │   ├── SudoPopup.tsx          # Elevated command authorization modal
+│       │   ├── Toast.tsx              # Real-time reminder toasts
+│       │   ├── Dashboard.tsx          # Analytics HUD
+│       │   └── Settings.tsx           # ZENO settings panel
+│       └── hooks/
+│           ├── useDaemonWs.ts         # WebSocket state hook (port 8767)
+│           └── useApi.ts              # REST API hook (port 8766)
+├── src-tauri/               # Rust Tauri native shell (system tray, autostart)
+├── scripts/                 # Setup scripts
+├── zeno_usage_guide.md      # Complete command reference
+├── ZENO_Testing_Cheatsheet.md
+├── requirements.txt
+└── ARCHITECTURE.md
 ```
 
 ---
 
 ## 🔒 Privacy & Security
 
-ZENO is designed **privacy-first**:
-
-- ✅ **All data is stored locally** — no cloud database, no telemetry
-- ✅ **Window titles are redacted** against your `privacy_exclusions` list before any storage
-- ✅ **Browser domains are redacted** against your privacy exclusions
-- ✅ **API keys are read from environment variables only** — never stored in files
-- ✅ **Macro Engine uses an app whitelist** — no arbitrary shell command execution
-- ✅ **External calls are limited to:** Google Gemini (reasoning) and optionally ElevenLabs (TTS)
+- ✅ **All data stored locally** — no cloud database, no telemetry
+- ✅ **Whisper mode is 100% offline** — audio never leaves your machine
+- ✅ **Window titles and browser domains redacted** against `privacy_exclusions`
+- ✅ **API keys from environment variables only** — never stored in files
+- ✅ **Macro engine uses an app whitelist** — no arbitrary shell execution
+- ✅ **Destructive terminal commands** require a two-phase SudoPopup confirmation with a timer
+- ✅ **External calls limited to:** Google Gemini (AI reasoning + Live voice) and optionally ElevenLabs (TTS)
 
 ---
 
@@ -451,6 +522,6 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) for detai
 
 **Built with ❤️ by [Varun Rathore](https://github.com/VarunRathore137)**
 
-*ZENO — Because your assistant should actually understand you.*
+*ZENO 2.0 — Because your assistant should actually understand you.*
 
 </div>
